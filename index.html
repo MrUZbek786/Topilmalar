@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bolajon Store</title>
+    <!-- Telegram Web App SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-color: #f4f6f8;
+            --card-bg: #ffffff;
+            --text-color: #222222;
+            --accent-color: #0088cc;
+            --secondary-text: #777777;
+            --border-radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding-bottom: 80px;
+        }
+
+        /* Header */
+        .header {
+            background-color: var(--card-bg);
+            padding: 15px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .header h1 {
+            font-size: 20px;
+            text-align: center;
+            color: var(--accent-color);
+            margin-bottom: 10px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 20px;
+            outline: none;
+            background-color: #f9f9f9;
+            font-size: 14px;
+        }
+
+        /* Banner Carousel */
+        .banner-container {
+            padding: 15px;
+            overflow-x: auto;
+            display: flex;
+            gap: 12px;
+            scrollbar-width: none;
+        }
+
+        .banner-card {
+            min-width: 85%;
+            background: linear-gradient(135deg, #e0f2fe, #bae6fd);
+            border-radius: var(--border-radius);
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .banner-text h3 {
+            font-size: 16px;
+            color: #0369a1;
+        }
+
+        .banner-text p {
+            font-size: 12px;
+            color: #0284c7;
+            margin-top: 4px;
+        }
+
+        /* Categories */
+        .categories {
+            display: flex;
+            gap: 8px;
+            padding: 0 15px 15px 15px;
+            overflow-x: auto;
+        }
+
+        .cat-chip {
+            padding: 8px 16px;
+            background-color: var(--card-bg);
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            font-size: 13px;
+            white-space: nowrap;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .cat-chip.active {
+            background-color: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        /* Product Grid */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            padding: 0 15px;
+        }
+
+        .product-card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+        }
+
+        .product-img {
+            width: 100%;
+            height: 130px;
+            object-fit: contain;
+            background-color: #fafafa;
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .product-title {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            height: 34px;
+            overflow: hidden;
+        }
+
+        .product-price {
+            font-size: 14px;
+            color: var(--accent-color);
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .add-btn {
+            background-color: #f0f7ff;
+            color: var(--accent-color);
+            border: 1px solid #cce3ff;
+            padding: 8px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: auto;
+        }
+
+        .add-btn:active {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        /* Bottom Nav */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--card-bg);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            border-top: 1px solid #eeeeee;
+        }
+
+        .nav-item {
+            text-align: center;
+            font-size: 11px;
+            color: var(--secondary-text);
+            text-decoration: none;
+            position: relative;
+        }
+
+        .nav-item.active {
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        .badge {
+            position: absolute;
+            top: -4px;
+            right: 12px;
+            background-color: #ef4444;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <div class="header">
+        <h1>Bolajon Store</h1>
+        <div class="search-box">
+            <input type="text" placeholder="Mahsulotlarni qidirish...">
+        </div>
+    </div>
+
+    <!-- Banners -->
+    <div class="banner-container">
+        <div class="banner-card">
+            <div class="banner-text">
+                <h3>Yozgi bolalar to'plamlari ☀️</h3>
+                <p>Eng sifatli va qulay kiyimlar</p>
+            </div>
+        </div>
+        <div class="banner-card" style="background: linear-gradient(135deg, #fef3c7, #fde68a);">
+            <div class="banner-text">
+                <h3 style="color: #b45309;">iPhone Chexollari 📱</h3>
+                <p style="color: #d97706;">Teksturali eksklyuziv modellar</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Categories -->
+    <div class="categories">
+        <button class="cat-chip active" onclick="filterCategory('all')">Barchasi</button>
+        <button class="cat-chip" onclick="filterCategory('kids')">👕 Bolalar kiyimlari</button>
+
+        <button class="cat-chip" onclick="filterCategory('cases')">📱 Phone Aksessuarlar</button>
+    </div>
+
+    <!-- Product Grid -->
+    <div class="product-grid" id="productGrid">
+        <!-- Products generated by JS -->
+    </div>
+
+    <!-- Bottom Nav -->
+    <div class="bottom-nav">
+        <div class="nav-item active">
+            <div>🏠</div>
+            <span>Bosh sahifa</span>
+        </div>
+        <div class="nav-item" onclick="openCart()">
+            <div>🛒</div>
+            <span>Savat</span>
+            <span class="badge" id="cartCount" style="display: none;">0</span>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Mini App'ni to'liq ekranga ochish
+
+        const products = [
+            {
+                id: 1,
+                name: "Bolalar yozgi futbolka seti",
+                category: "kids",
+                price: "85,000 so'm",
+                image: "https://via.placeholder.com/150/ffffff/0088cc?text=Bolalar+Set"
+            },
+            {
+                id: 2,
+                name: "iPhone 15 Pro Max Tekstura Chexol",
+                category: "cases",
+                price: "65,000 so'm",
+                image: "https://via.placeholder.com/150/ffffff/0088cc?text=iPhone+Case"
+            },
+            {
+                id: 3,
+                name: "O'g'il bolalar uchun shortik-futbolka",
+                category: "kids",
+                price: "95,000 so'm",
+                image: "https://via.placeholder.com/150/ffffff/0088cc?text=Yozgi+To%27plam"
+            },
+            {
+                id: 4,
+                name: "iPhone 13 / 14 Silikon Chexol",
+                category: "cases",
+                price: "45,000 so'm",
+                image: "https://via.placeholder.com/150/ffffff/0088cc?text=Silikon+Case"
+            }
+        ];
+
+        let cart = [];
+
+        function renderProducts(items) {
+            const grid = document.getElementById('productGrid');
+            grid.innerHTML = '';
+            
+            items.forEach(product => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.innerHTML = `
+                    <img src="${product.image}" class="product-img" alt="${product.name}">
+                    <div class="product-title">${product.name}</div>
+                    <div class="product-price">${product.price}</div>
+                    <button class="add-btn" onclick="addToCart(${product.id})">+ Savatga</button>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterCategory(cat) {
+            document.querySelectorAll('.cat-chip').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            if (cat === 'all') {
+                renderProducts(products);
+            } else {
+                const filtered = products.filter(p => p.category === cat);
+                renderProducts(filtered);
+            }
+        }
+
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            cart.push(product);
+            updateCart();
+        }
+
+        function updateCart() {
+            const badge = document.getElementById('cartCount');
+            if (cart.length > 0) {
+                badge.innerText = cart.length;
+                badge.style.display = 'block';
+                
+                // Telegram pastki tugmasini faollashtirish
+                tg.MainButton.setText(`SAVATNI KO'RISH (${cart.length})`);
+                tg.MainButton.show();
+            } else {
+                badge.style.display = 'none';
+                tg.MainButton.hide();
+            }
+        }
+
+        // Boshlanishida barcha mahsulotlarni chiqarish
+        renderProducts(products);
+    </script>
+</body>
+</html>
