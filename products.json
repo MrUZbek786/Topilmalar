@@ -5,7 +5,10 @@
         "category": "kids",
         "priceNum": 85000,
         "price": "85,000 so'm",
-        "image": "https://via.placeholder.com/150/ffffff/0088cc?text=Bolalar+Set"
+        "images": [
+            "https://via.placeholder.com/150/ffffff/0088cc?text=Bolalar+Set+1",
+            "https://via.placeholder.com/150/ffffff/0088cc?text=Bolalar+Set+2"
+        ]
     },
     {
         "id": 2,
@@ -13,7 +16,10 @@
         "category": "cases",
         "priceNum": 65000,
         "price": "65,000 so'm",
-        "image": "https://via.placeholder.com/150/ffffff/0088cc?text=iPhone+Case"
+        "images": [
+            "https://via.placeholder.com/150/ffffff/0088cc?text=iPhone+Case+1",
+            "https://via.placeholder.com/150/ffffff/0088cc?text=iPhone+Case+2"
+        ]
     },
     {
         "id": 3,
@@ -21,7 +27,10 @@
         "category": "kids",
         "priceNum": 95000,
         "price": "95,000 so'm",
-        "image": "https://via.placeholder.com/150/ffffff/0088cc?text=Yozgi+To%27plam"
+        "images": [
+            "https://via.placeholder.com/150/ffffff/0088cc?text=Yozgi+Toplam+1",
+            "https://via.placeholder.com/150/ffffff/0088cc?text=Yozgi+Toplam+2"
+        ]
     },
     {
         "id": 4,
@@ -29,6 +38,9 @@
         "category": "cases",
         "priceNum": 45000,
         "price": "45,000 so'm",
-        "image": "https://via.placeholder.com/150/ffffff/0088cc?text=Silikon+Case"
+        "images": [
+            "https://via.placeholder.com/150/ffffff/0088cc?text=Silikon+Case+1",
+            "https://via.placeholder.com/150/ffffff/0088cc?text=Silikon+Case+2"
+        ]
     }
 ]
