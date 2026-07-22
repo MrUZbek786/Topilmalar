@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bolajon Store</title>
+    <title>Topilmalar Do'koni</title>
     <!-- Telegram Web App SDK -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
@@ -213,7 +213,7 @@
 
     <!-- Header -->
     <div class="header">
-        <h1>Bolajon Store</h1>
+        <h1>Topilmalar Do'koni</h1>
         <div class="search-box">
             <input type="text" placeholder="Mahsulotlarni qidirish...">
         </div>
@@ -262,12 +262,11 @@
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Mini App'ni to'liq ekranga ochish
+        tg.expand();
 
         let products = [];
         let cart = [];
 
-        // Mahsulotlarni tashqi products.json faylidan yuklab olish
         async function loadProducts() {
             try {
                 const response = await fetch('products.json');
@@ -283,7 +282,6 @@
             grid.innerHTML = '';
             
             items.forEach(product => {
-                // Yangi images massividan 1-rasmni olish (agar mavjud bo'lmasa eski image'ni tekshiradi)
                 let imageUrl = (product.images && product.images.length > 0) ? product.images[0] : product.image;
 
                 const card = document.createElement('div');
@@ -384,7 +382,6 @@
             }
         }
 
-        // Sahifa ochilganda mahsulotlarni yuklash funksiyasini ishga tushirish
         loadProducts();
     </script>
 </body>
