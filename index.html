@@ -188,6 +188,7 @@
             color: var(--secondary-text);
             text-decoration: none;
             position: relative;
+            cursor: pointer;
         }
 
         .nav-item.active {
@@ -207,7 +208,6 @@
             font-weight: bold;
         }
     </style>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
 
@@ -239,7 +239,6 @@
     <div class="categories">
         <button class="cat-chip active" onclick="filterCategory('all')">Barchasi</button>
         <button class="cat-chip" onclick="filterCategory('kids')">👕 Bolalar kiyimlari</button>
-
         <button class="cat-chip" onclick="filterCategory('cases')">📱 Phone Aksessuarlar</button>
     </div>
 
@@ -366,11 +365,25 @@
             }
         }
 
-        // Telegram pastki tugmasi bosilganda ishlaydigan funksiya
+        // Telegram yashil tugmasi bosilganda ishlaydigan funksiya (Shu yer o'zgartirildi)
         Telegram.WebApp.onEvent('mainButtonClicked', function() {
+            if (cart.length === 0) {
+                alert("Savatchangiz bo'sh!");
+                return;
+            }
+
+            // Mijozdan telefon raqami va manzilini so'raymiz
+            let phone = prompt("Bog'lanish uchun telefon raqamingizni kiriting (masalan: +998901234567):");
+            if (!phone) return; // Agar raqam kiritmasa, jarayon to'xtaydi
+
+            let address = prompt("Yetkazib berish manzilini kiriting:");
+            if (!address) return; // Agar manzil kiritmasa, jarayon to'xtaydi
+
             let totalPrice = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             
             let orderData = {
+                phone: phone,
+                address: address,
                 items: cart,
                 total_price: totalPrice
             };
@@ -379,11 +392,21 @@
             tg.sendData(JSON.stringify(orderData));
         });
 
+        // Pastki menyudagi Savat tugmasi bosilganda ishlaydigan funksiya (Shu yer o'zgartirildi)
         function openCart() {
             if (cart.length === 0) {
-                alert("Savatchangiz bo'sh!");
+                alert("Savatchangiz bo'sh! Iltimos, mahsulot qo'shing.");
             } else {
-                alert(`Savatchada ${cart.length} xil mahsulot bor.`);
+                let cartDetails = "🛒 Savatchadagi mahsulotlar:\n\n";
+                let total = 0;
+                
+                cart.forEach((item, index) => {
+                    cartDetails += `${index + 1}. ${item.name} - ${item.quantity} ta\n`;
+                    total += item.price * item.quantity;
+                });
+                
+                cartDetails += `\nJami: ${total} so'm\n\nBuyurtma berish uchun pastdagi yashil tugmani bosing!`;
+                alert(cartDetails);
             }
         }
 
