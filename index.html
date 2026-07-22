@@ -283,10 +283,13 @@
             grid.innerHTML = '';
             
             items.forEach(product => {
+                // Yangi images massividan 1-rasmni olish (agar mavjud bo'lmasa eski image'ni tekshiradi)
+                let imageUrl = (product.images && product.images.length > 0) ? product.images[0] : product.image;
+
                 const card = document.createElement('div');
                 card.className = 'product-card';
                 card.innerHTML = `
-                    <img src="${product.image}" class="product-img" alt="${product.name}">
+                    <img src="${imageUrl}" class="product-img" alt="${product.name}">
                     <div class="product-title">${product.name}</div>
                     <div class="product-price">${product.price}</div>
                     <button class="add-btn" onclick="addToCart(${product.id})">+ Savatga</button>
