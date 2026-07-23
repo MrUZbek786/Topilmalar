@@ -173,7 +173,7 @@
             color: white;
         }
 
-        /* Modal Dizayni va Slayder */
+        /* Modal Dizayni */
         .modal {
             position: fixed;
             top: 0;
@@ -194,7 +194,7 @@
             border-radius: 20px 20px 0 0;
             width: 100%;
             max-width: 500px;
-            max-height: 90vh;
+            max-height: 85vh;
             overflow-y: auto;
             position: relative;
             box-shadow: 0 -4px 25px rgba(0,0,0,0.15);
@@ -282,6 +282,50 @@
             margin-bottom: 20px;
         }
 
+        /* Savat Modal Dizayni Elementlari */
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .cart-item-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .cart-item-price {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .qty-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .qty-btn {
+            width: 28px;
+            height: 28px;
+            border: 1px solid #cbd5e1;
+            background: #fff;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .qty-btn:active {
+            background: #f1f5f9;
+        }
+
         /* Bottom Nav */
         .bottom-nav {
             position: fixed;
@@ -328,7 +372,7 @@
     <div class="header">
         <h1>Topilmalar Do'koni</h1>
         <div class="search-box">
-            <input type="text" placeholder="Mahsulotlarni qidirish...">
+            <input type="text" id="searchInput" placeholder="Mahsulotlarni qidirish..." oninput="handleSearch()">
         </div>
     </div>
 
@@ -350,34 +394,41 @@
 
     <!-- Categories -->
     <div class="categories">
-        <button class="cat-chip active" onclick="filterCategory('all')">Barchasi</button>
-        <button class="cat-chip" onclick="filterCategory('kids')">👕 Bolalar kiyimlari</button>
-        <button class="cat-chip" onclick="filterCategory('cases')">📱 Phone Aksessuarlar</button>
+        <button class="cat-chip active" onclick="filterCategory('all', event)">Barchasi</button>
+        <button class="cat-chip" onclick="filterCategory('kids', event)">👕 Bolalar kiyimlari</button>
+        <button class="cat-chip" onclick="filterCategory('cases', event)">📱 Phone Aksessuarlar</button>
     </div>
 
     <!-- Product Grid -->
     <div class="product-grid" id="productGrid"></div>
 
     <!-- Product Details Modal -->
-    <div id="productModal" class="modal" onclick="closeModalOutside(event)">
+    <div id="productModal" class="modal" onclick="closeModalOutside(event, 'productModal')">
         <div class="modal-content">
-            <span class="close-btn" onclick="closeModal()">&times;</span>
-            
-            <!-- Slayder -->
+            <span class="close-btn" onclick="closeModal('productModal')">&times;</span>
             <div class="modal-slider" id="modalSlider"></div>
-
-            <!-- Ma'lumotlar -->
             <div class="modal-info-box">
                 <div id="modalTitle" class="modal-title"></div>
                 <div id="modalPrice" class="modal-price"></div>
             </div>
-
             <div>
                 <div class="modal-desc-title">Mahsulot haqida</div>
                 <div id="modalDescription" class="modal-desc"></div>
             </div>
+            <button class="add-btn" style="width: 100%; padding: 12px; font-size: 14px;" onclick="addToCartFromModal()">+ Savatga qo'shish</button>
+        </div>
+    </div>
 
-            <button class="add-btn" id="modalAddBtn" style="width: 100%; padding: 12px; font-size: 14px;" onclick="addToCartFromModal()">+ Savatga qo'shish</button>
+    <!-- Cart Modal (Yangi Savat Modali) -->
+    <div id="cartModal" class="modal" onclick="closeModalOutside(event, 'cartModal')">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('cartModal')">&times;</span>
+            <h2 style="font-size: 18px; font-weight: 700; margin-bottom: 15px;">🛒 Savat</h2>
+            <div id="cartItemsList"></div>
+            <div style="margin-top: 15px; padding-top: 15px; border-top: 2px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-weight: 600; font-size: 16px;">Jami:</span>
+                <span id="cartTotalPrice" style="font-size: 18px; font-weight: 800; color: var(--accent-color);">0 so'm</span>
+            </div>
         </div>
     </div>
 
@@ -387,7 +438,7 @@
             <div>🏠</div>
             <span>Bosh sahifa</span>
         </div>
-        <div class="nav-item" onclick="openCart()">
+        <div class="nav-item" onclick="openCartModal()">
             <div>🛒</div>
             <span>Savat</span>
             <span class="badge" id="cartCount" style="display: none;">0</span>
@@ -401,6 +452,7 @@
         let products = [];
         let cart = [];
         let activeModalProductId = null;
+        let activeCategory = 'all';
 
         async function loadProducts() {
             try {
@@ -416,6 +468,11 @@
             const grid = document.getElementById('productGrid');
             grid.innerHTML = '';
             
+            if (items.length === 0) {
+                grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: #888; padding: 20px;">Mahsulot topilmadi</div>`;
+                return;
+            }
+
             items.forEach(product => {
                 let imageUrl = (product.images && product.images.length > 0) ? product.images[0] : '';
 
@@ -432,12 +489,31 @@
             });
         }
 
+        /* REAL-TIME SEARCH */
+        function handleSearch() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            const filtered = products.filter(p => {
+                const matchesCategory = (activeCategory === 'all' || p.category === activeCategory);
+                const matchesName = p.name.toLowerCase().includes(query);
+                return matchesCategory && matchesName;
+            });
+            renderProducts(filtered);
+        }
+
+        /* CATEGORY FILTER */
+        function filterCategory(cat, event) {
+            activeCategory = cat;
+            document.querySelectorAll('.cat-chip').forEach(btn => btn.classList.remove('active'));
+            if(event) event.target.classList.add('active');
+            handleSearch();
+        }
+
+        /* PRODUCT DETAIL MODAL */
         function openProductModal(productId) {
             const product = products.find(p => p.id === productId);
             if (!product) return;
 
             activeModalProductId = product.id;
-            
             let images = (product.images && product.images.length > 0) ? product.images : [];
 
             const slider = document.getElementById('modalSlider');
@@ -451,43 +527,30 @@
 
             document.getElementById('modalTitle').innerText = product.name;
             document.getElementById('modalPrice').innerText = product.price;
-            
-            // products.json dagi description maydonini modalga chiqarish
             document.getElementById('modalDescription').innerText = product.description || "Yuqori sifatli materialdan tayyorlangan. Qulay va zamonaviy dizayn.";
             
             document.getElementById('productModal').style.display = 'flex';
         }
 
-        function closeModal() {
-            document.getElementById('productModal').style.display = 'none';
-            activeModalProductId = null;
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            if(modalId === 'productModal') activeModalProductId = null;
         }
 
-        function closeModalOutside(event) {
-            if (event.target.id === 'productModal') {
-                closeModal();
+        function closeModalOutside(event, modalId) {
+            if (event.target.id === modalId) {
+                closeModal(modalId);
             }
         }
 
         function addToCartFromModal() {
             if (activeModalProductId !== null) {
                 addToCart(activeModalProductId);
-                closeModal();
+                closeModal('productModal');
             }
         }
 
-        function filterCategory(cat) {
-            document.querySelectorAll('.cat-chip').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-
-            if (cat === 'all') {
-                renderProducts(products);
-            } else {
-                const filtered = products.filter(p => p.category === cat);
-                renderProducts(filtered);
-            }
-        }
-
+        /* CART MANAGEMENT (+ / - / DELETE) */
         function addToCart(productId) {
             const product = products.find(p => p.id === productId);
             if (!product) return;
@@ -506,6 +569,18 @@
             updateCart();
         }
 
+        function changeQuantity(productId, delta) {
+            const item = cart.find(i => i.id === productId);
+            if (!item) return;
+
+            item.quantity += delta;
+            if (item.quantity <= 0) {
+                cart = cart.filter(i => i.id !== productId);
+            }
+            updateCart();
+            renderCartItems();
+        }
+
         function updateCart() {
             const badge = document.getElementById('cartCount');
             const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -513,20 +588,57 @@
             if (totalCount > 0) {
                 badge.innerText = totalCount;
                 badge.style.display = 'block';
-                
                 tg.MainButton.setText(`BUYURTMA BERISH (${totalCount} ta)`);
                 tg.MainButton.show();
             } else {
                 badge.style.display = 'none';
                 tg.MainButton.hide();
+                closeModal('cartModal');
             }
         }
 
-        Telegram.WebApp.onEvent('mainButtonClicked', function() {
+        /* CART MODAL RENDER */
+        function openCartModal() {
             if (cart.length === 0) {
                 alert("Savatchangiz bo'sh!");
                 return;
             }
+            renderCartItems();
+            document.getElementById('cartModal').style.display = 'flex';
+        }
+
+        function renderCartItems() {
+            const container = document.getElementById('cartItemsList');
+            container.innerHTML = '';
+
+            let totalPrice = 0;
+
+            cart.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                totalPrice += itemTotal;
+
+                const row = document.createElement('div');
+                row.className = 'cart-item';
+                row.innerHTML = `
+                    <div>
+                        <div class="cart-item-title">${item.name}</div>
+                        <div class="cart-item-price">${item.price.toLocaleString()} so'm</div>
+                    </div>
+                    <div class="qty-controls">
+                        <button class="qty-btn" onclick="changeQuantity(${item.id}, -1)">-</button>
+                        <span style="font-weight:600; font-size:14px; min-width: 18px; text-align:center;">${item.quantity}</span>
+                        <button class="qty-btn" onclick="changeQuantity(${item.id}, 1)">+</button>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+
+            document.getElementById('cartTotalPrice').innerText = `${totalPrice.toLocaleString()} so'm`;
+        }
+
+        /* TELEGRAM MAIN BUTTON CLICK EVENT */
+        Telegram.WebApp.onEvent('mainButtonClicked', function() {
+            if (cart.length === 0) return;
 
             let phone = prompt("Bog'lanish uchun telefon raqamingizni kiriting (masalan: +998901234567):");
             if (!phone) return; 
@@ -545,23 +657,6 @@
 
             tg.sendData(JSON.stringify(orderData));
         });
-
-        function openCart() {
-            if (cart.length === 0) {
-                alert("Savatchangiz bo'sh! Iltimos, mahsulot qo'shing.");
-            } else {
-                let cartDetails = "🛒 Savatchadagi mahsulotlar:\n\n";
-                let total = 0;
-                
-                cart.forEach((item, index) => {
-                    cartDetails += `${index + 1}. ${item.name} - ${item.quantity} ta\n`;
-                    total += item.price * item.quantity;
-                });
-                
-                cartDetails += `\nJami: ${total} so'm\n\nBuyurtma berish uchun pastdagi yashil tugmani bosing!`;
-                alert(cartDetails);
-            }
-        }
 
         loadProducts();
     </script>
